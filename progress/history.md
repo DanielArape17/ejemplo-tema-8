@@ -51,3 +51,11 @@
 - **Cambios:** `src/cli.py` (subcomando `edit` y `cmd_edit` que construye una nueva instancia `Note` preservando `id`/`created_at`), `tests/test_cli.py` (5 tests: cada flag, ambos juntos, id inexistente, ausencia de flags).
 - **Verificación:** `./init.sh` verde, 22 tests pasan. Reviewer APPROVED (`progress/review_cli_edit.md`).
 - **Cierre:** feature 6 marcada `done`. Todas las features del proyecto completadas.
+
+## 2026-06-09 — Feature 7: cli_recent
+- **Agente:** Líder (orquestador) → Implementer → Reviewer (AGENTS.md workflow)
+- **Nota de entorno:** `init.sh` es bash; equipo Windows. Python 3.12 instalado via winget.
+- **Plan:** añadir `cmd_recent` con `--limit` (default=5), orden descendente por `created_at`, tests para default/custom/vacío/límite inválido.
+- **Cambios:** `src/cli.py` (función `cmd_recent`, subparser `recent` en `build_parser`), `tests/test_cli.py` (clase `TestCliRecent` con 4 tests).
+- **Verificación:** 26/26 tests verdes (22 preexistentes + 4 nuevos). Reviewer APPROVED (`progress/review.md`).
+- **Cierre:** feature 7 marcada `done`. Proyecto completo (7/7 features).

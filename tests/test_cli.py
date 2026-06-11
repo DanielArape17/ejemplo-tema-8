@@ -152,5 +152,60 @@ class TestCli(unittest.TestCase):
         self.assertEqual(notes[0]["body"], "a")
 
 
+class TestCliRecent(unittest.TestCase):
+    def setUp(self) -> None:
+        self.tmp = tempfile.TemporaryDirectory()
+        self.path = os.path.join(self.tmp.name, "notes.json")
+        self._patch = patch.object(storage, "DEFAULT_NOTES_PATH", self.path)
+        self._patch.start()
+
+    def tearDown(self) -> None:
+        self._patch.stop()
+        self.tmp.cleanup()
+
+    def _run(self, argv: list[str]) -> tuple[int, str, str]:
+        out_buf = io.StringIO()
+        err_buf = io.StringIO()
+        with redirect_stdout(out_buf), redirect_stderr(err_buf):
+            code = cli.main(argv)
+        return code, out_buf.getvalue(), err_buf.getvalue()
+
+    def test_recent_default_limit_returns_5_most_recent(self) -> None:
+        for i in range(8):
+            self._run(["add", f"nota-{i+1}", "--body", "x"])
+        code, out, _ = self._run(["recent"])
+        self.assertEqual(code, 0)
+        lines = out.strip().splitlines()
+        self.assertEqual(len(lines), 5)
+        ids = [int(line.split("\t")[0]) for line in lines]
+        self.assertEqual(ids, [8, 7, 6, 5, 4])
+
+    def test_recent_custom_limit(self) -> None:
+        for i in range(8):
+            self._run(["add", f"nota-{i+1}", "--body", "x"])
+        code, out, _ = self._run(["recent", "--limit", "3"])
+        self.assertEqual(code, 0)
+        lines = out.strip().splitlines()
+        self.assertEqual(len(lines), 3)
+        ids = [int(line.split("\t")[0]) for line in lines]
+        self.assertEqual(ids, [8, 7, 6])
+
+    def test_recent_empty_notes_outputs_nothing(self) -> None:
+        code, out, _ = self._run(["recent"])
+        self.assertEqual(code, 0)
+        self.assertEqual(out, "")
+
+    def test_recent_invalid_limit_returns_error(self) -> None:
+        self._run(["add", "nota", "--body", "x"])
+        code, out, err = self._run(["recent", "--limit", "0"])
+        self.assertNotEqual(code, 0)
+        self.assertEqual(out, "")
+        self.assertIn("0", err)
+        code2, out2, err2 = self._run(["recent", "--limit", "-1"])
+        self.assertNotEqual(code2, 0)
+        self.assertEqual(out2, "")
+        self.assertIn("-1", err2)
+
+
 if __name__ == "__main__":
     unittest.main()

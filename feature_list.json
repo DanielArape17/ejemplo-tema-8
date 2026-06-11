@@ -98,7 +98,7 @@
         "Si `--limit` es <= 0, exit code != 0 y mensaje claro en stderr",
         "tests/test_cli.py cubre: orden por defecto, límite custom, archivo vacío, límite inválido"
       ],
-      "status": "pending"
+      "status": "done"
     }
   ]
 }

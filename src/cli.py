@@ -45,6 +45,16 @@ def cmd_delete(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_recent(args: argparse.Namespace) -> int:
+    if args.limit <= 0:
+        raise NoteError(f"--limit debe ser mayor que 0, se recibio {args.limit}")
+    notes = storage.load()
+    sorted_notes = sorted(notes, key=lambda n: (n["created_at"], n["id"]), reverse=True)
+    for n in sorted_notes[:args.limit]:
+        print(f"{n['id']}\t{n['created_at']}\t{n['title']}")
+    return 0
+
+
 def cmd_search(args: argparse.Namespace) -> int:
     notes = storage.load()
     query = args.query.lower()
@@ -86,6 +96,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_list = sub.add_parser("list", help="Listar todas las notas.")
     p_list.set_defaults(func=cmd_list)
+
+    p_recent = sub.add_parser("recent", help="Listar las notas mas recientes.")
+    p_recent.add_argument("--limit", type=int, default=5)
+    p_recent.set_defaults(func=cmd_recent)
 
     p_show = sub.add_parser("show", help="Mostrar una nota por id.")
     p_show.add_argument("id", type=int)
